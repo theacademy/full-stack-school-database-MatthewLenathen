@@ -31,10 +31,8 @@ public class CourseDaoImpl implements CourseDao {
     @Override
     public List<Course> getAllCourses() {
         //YOUR CODE STARTS HERE
-
-
-        return null;
-
+        final String GET_ALL_COURSES = "SELECT * FROM course";
+        return jdbcTemplate.query(GET_ALL_COURSES,new CourseMapper());
         //YOUR CODE ENDS HERE
     }
 

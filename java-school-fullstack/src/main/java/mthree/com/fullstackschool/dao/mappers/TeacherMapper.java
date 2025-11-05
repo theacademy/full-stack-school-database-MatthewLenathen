@@ -9,10 +9,12 @@ public class TeacherMapper implements RowMapper<Teacher> {
     @Override
     public Teacher mapRow(ResultSet rs, int rowNum) throws SQLException {
         //YOUR CODE STARTS HERE
-
-
-        return null;
-
+        Teacher tch = new Teacher();
+        tch.setTeacherId(rs.getInt("tid"));
+        tch.setDept(rs.getString("dept"));
+        tch.setTeacherFName(rs.getString("tFName"));
+        tch.setTeacherLName(rs.getString("tLName"));
+        return tch;
         //YOUR CODE ENDS HERE
     }
 }
