@@ -4,8 +4,12 @@ import mthree.com.fullstackschool.dao.mappers.CourseMapper;
 import mthree.com.fullstackschool.model.Course;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -19,15 +23,27 @@ public class CourseDaoImpl implements CourseDao {
     }
 
     @Override
+    @Transactional
     public Course createNewCourse(Course course) {
         //YOUR CODE STARTS HERE
-        final String INSERT_COURSE = "INSERT INTO course(courseCode, courseDesc, teacherId) VALUES(?,?,?)";
-        jdbcTemplate.update(INSERT_COURSE,
-                course.getCourseName(),
-                course.getCourseDesc(),
-                course.getTeacherId());
-        int newId = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+        // had to use keyHolders cause the select last id wasn't working with the tests
+        final String INSERT_COURSE =
+                "INSERT INTO course(courseCode, courseDesc, teacherId) VALUES(?,?,?)";
+
+        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(INSERT_COURSE, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, course.getCourseName());
+            ps.setString(2, course.getCourseDesc());
+            ps.setInt(3, course.getTeacherId());
+            return ps;
+        }, keyHolder);
+
+        // get the automatically generated key value, we need this so we can reference it if needed
+        int newId = keyHolder.getKey().intValue();
         course.setCourseId(newId);
+
         return course;
         //YOUR CODE ENDS HERE
     }
